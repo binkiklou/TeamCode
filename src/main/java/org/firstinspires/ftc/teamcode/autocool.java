@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -22,6 +24,7 @@ public class autocool extends OpMode {
     private DistanceSensor dFront = null;
     private DistanceSensor dLeft = null;
     private DistanceSensor dRight = null;
+    private ColorRangeSensor cGround = null;
 
     // Variables
 
@@ -47,9 +50,14 @@ public class autocool extends OpMode {
         dFront = hardwareMap.get(DistanceSensor.class, "DistanceFront");
         dLeft = hardwareMap.get(DistanceSensor.class, "DistanceLeft");
         dRight = hardwareMap.get(DistanceSensor.class, "DistanceRight");
+        cGround = hardwareMap.get(ColorRangeSensor.class, "GroundColor");
+        int soundID = hardwareMap.appContext.getResources().getIdentifier("dababy", "raw", hardwareMap.appContext.getPackageName());
 
-        telemetry.addLine("Better curves");
+        telemetry.addLine("Lets go update");
         telemetry.update();
+
+        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext, soundID);
+
     }
 
     @Override
@@ -106,6 +114,7 @@ public class autocool extends OpMode {
 
         telemetry.addData("State:", state);
         telemetry.addData("Traveled",navigation.traveled);
+        telemetry.addData("Colors:",String.format("(%d,%d,%d)",cGround.red(),cGround.green(),cGround.blue()));
         telemetry.update();
     }
 
@@ -117,20 +126,30 @@ public class autocool extends OpMode {
         {
             telemetry.addLine("Help I'm lost UwU");
             telemetry.update();
+            should_move = false;
             return;
         }
 
-        if(navigation.traveled <= 3500)
+        if(
+                navigation.traveled <= 3500 //||
+        //                (navigation.traveled > 2500 && (cGround.red() >= 1000 || cGround.green() >= 1000 || cGround.blue() >= 1000))
+        )
         {
-            // 5000 c un chiffre nice
-            double speed = (10000f-navigation.traveled) / 10000f;
-            telemetry.addData("Speed:",speed);
-            telemetry.update();
+            double speed = ((10000f-navigation.traveled) / 10000f)/1.5;
+            if(navigation.traveled > 2750)
+            {
+                speed /= 2;
+            }
             mecanum.update(0,-speed,0);
             should_move = true;
         }
         else
         {
+            if(navigation.traveled >= 4200)
+            {
+                state = 5;
+            }
+
             should_move = false;
             state++;
         }
