@@ -23,9 +23,15 @@ public class autocool extends OpMode {
     private DistanceSensor dLeft = null;
     private DistanceSensor dRight = null;
 
-    // Values
-    private boolean reached = false;
-    private boolean force_stop = false;
+    // Variables
+
+    // États
+    // 0 - Bouge vers le centre
+    // 1 - Atteint le centre
+    private int state = 0;
+
+    private boolean should_move = false;
+
 
     @Override
     public void init() {
@@ -39,58 +45,53 @@ public class autocool extends OpMode {
         dLeft = hardwareMap.get(DistanceSensor.class, "DistanceLeft");
         dRight = hardwareMap.get(DistanceSensor.class, "DistanceRight");
 
-        // Reset every units
-        lFront.resetDeviceConfigurationForOpMode();
-        rFront.resetDeviceConfigurationForOpMode();
-        lBack.resetDeviceConfigurationForOpMode();
-        rBack.resetDeviceConfigurationForOpMode();
-        reached = false;
-        force_stop = false;
-
-        telemetry.addLine("Welcome to the Auto Zone!");
+        telemetry.addLine("Regroup");
         telemetry.update();
     }
 
     @Override
     public void loop() {
-        // Emergency Checks
-        if(dFront.getDistance(DistanceUnit.CM) <= 15|| dLeft.getDistance(DistanceUnit.CM) <= 15 || dRight.getDistance(DistanceUnit.CM) <= 15)
-        {
-            force_stop = true;
-        }
+        // Update Inputs
+        navigation.avg_travel(lFront.getCurrentPosition(),rFront.getCurrentPosition(),lBack.getCurrentPosition(),rBack.getCurrentPosition());
+        navigation.avg_sensors(dFront.getDistance(DistanceUnit.CM),dLeft.getDistance(DistanceUnit.CM),dRight.getDistance(DistanceUnit.CM));
 
-        if(navigation.traveled >= 3500)
+        if(state == 0)
         {
-            reached = true;
+            move_mid();
         }
-
-        // Drive for around 3500 encoder
-        if(!reached)
+        else if(state == 1)
         {
-            mecanum.update(0,-1,0);
+            state++;
         }
         else
         {
-            mecanum.update(0,0,0);
+            telemetry.addLine("Invalid state");
+            telemetry.update();
         }
 
-        if(!force_stop)
+        // Emergency Checks
+        if(navigation.front <= 20|| navigation.left <= 15 || navigation.right <= 15)
         {
-            lFront.setPower(-mecanum.l1);
+            should_move = false;
+        }
+
+        if(should_move)
+        {
+            lFront.setPower(mecanum.l1);
             rFront.setPower(mecanum.r1);
-            lBack.setPower(-mecanum.l2);
+            lBack.setPower(mecanum.l2);
             rBack.setPower(mecanum.r2);
         }
         else
         {
-            lFront.setPower(0);
-            rFront.setPower(0);
-            lBack.setPower(0);
-            rBack.setPower(0);
 
-            telemetry.addLine("FORCE STOPPED!!!!");
-            telemetry.update();
         }
-        navigation.avg_travel(lFront.getCurrentPosition(),rFront.getCurrentPosition(),lBack.getCurrentPosition(),rBack.getCurrentPosition());
+    }
+
+    // Moving to mid
+    public void move_mid()
+    {
+        double speed = 1;
+        mecanum.update(0,-speed,0);
     }
 }

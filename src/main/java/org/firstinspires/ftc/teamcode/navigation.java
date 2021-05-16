@@ -5,12 +5,9 @@ public class navigation {
     // Traveled distance
     public static int traveled = 0;
 
-    // Oh boi
-    public static void update()
-    {
-        // Bouger jusqua ligne blance,
-        // Doit checker pour ligne blanche
-    }
+    public static double front = 0;
+    public static double left = 0;
+    public static double right = 0;
 
     public static void avg_travel(int a,int b, int c, int d)
     {
@@ -19,5 +16,12 @@ public class navigation {
         d = -d;
 
         traveled = (a+b+c+d)/4;
+    }
+
+    public static void avg_sensors(double a, double b, double c)
+    {
+        front = (front + a)/2;
+        left = (left + b)/2;
+        right = (right + c)/2;
     }
 }

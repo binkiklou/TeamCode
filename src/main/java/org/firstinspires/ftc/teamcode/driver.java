@@ -1,8 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -23,6 +27,7 @@ public class driver extends OpMode {
     private DistanceSensor dFront = null;
     private DistanceSensor dLeft = null;
     private DistanceSensor dRight = null;
+    private ColorRangeSensor cGround = null;
 
     // Values
     private boolean sclaw = false;
@@ -39,8 +44,9 @@ public class driver extends OpMode {
         dFront = hardwareMap.get(DistanceSensor.class, "DistanceFront");
         dLeft = hardwareMap.get(DistanceSensor.class, "DistanceLeft");
         dRight = hardwareMap.get(DistanceSensor.class, "DistanceRight");
+        cGround = hardwareMap.get(ColorRangeSensor.class, "GroundColor");
 
-        telemetry.addLine("K update");
+        telemetry.addLine("Gimme the color");
         telemetry.update();
     }
 
@@ -54,6 +60,7 @@ public class driver extends OpMode {
         telemetry.addData("Encoders",String.format("({%d,%d},{%d,%d})",lFront.getCurrentPosition(),rFront.getCurrentPosition(),lBack.getCurrentPosition(),rBack.getCurrentPosition()));
         telemetry.addData("Distances:",String.format("%.01f; %.01f, %.01f",dFront.getDistance(DistanceUnit.CM),dLeft.getDistance(DistanceUnit.CM),dRight.getDistance(DistanceUnit.CM)));
         telemetry.addData("Traveled: ",String.format("%d",navigation.traveled));
+        telemetry.addData("Ground Color:",String.format("(%d,%d,%d)",cGround.red(),cGround.blue(),cGround.green()));
         telemetry.update();
 
         // Input Update
