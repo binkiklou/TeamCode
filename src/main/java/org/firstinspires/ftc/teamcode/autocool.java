@@ -38,6 +38,8 @@ public class autocool extends OpMode {
 
     private boolean should_move = false;
 
+    private boolean wait_for_something = false; // Terrible
+
 
     @Override
     public void init() {
@@ -53,7 +55,7 @@ public class autocool extends OpMode {
         cGround = hardwareMap.get(ColorRangeSensor.class, "GroundColor");
         int soundID = hardwareMap.appContext.getResources().getIdentifier("dababy", "raw", hardwareMap.appContext.getPackageName());
 
-        telemetry.addLine("Lets go update");
+        telemetry.addLine("wack");
         telemetry.update();
 
         SoundPlayer.getInstance().startPlaying(hardwareMap.appContext, soundID);
@@ -77,12 +79,28 @@ public class autocool extends OpMode {
         }
         else if(state == 2)
         {
+            move_target();
         }
         else if(state == 3)
         {
+            lFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            lBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            state++;
+            wait_for_something = true;
         }
         else if(state == 4)
         {
+            if(wait_for_something)
+            {
+                lFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                rFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                lBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                rBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                wait_for_something = false;
+            }
+            move_back();
         }
         else
         {
@@ -131,7 +149,7 @@ public class autocool extends OpMode {
         }
 
         if(
-                navigation.traveled <= 3500 //||
+                navigation.traveled <= 4200 //||
         //                (navigation.traveled > 2500 && (cGround.red() >= 1000 || cGround.green() >= 1000 || cGround.blue() >= 1000))
         )
         {
@@ -153,5 +171,24 @@ public class autocool extends OpMode {
             should_move = false;
             state++;
         }
+    }
+
+    public void move_target()
+    {
+        if(navigation.traveled < 1000)
+        {
+            mecanum.update(0,-0.5,0);
+            should_move = true;
+        }
+        else
+        {
+            should_move = false;
+            state++;
+        }
+    }
+
+    public void move_back()
+    {
+        state++;
     }
 }
