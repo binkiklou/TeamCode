@@ -28,6 +28,9 @@ public class autocool extends OpMode {
     // États
     // 0 - Bouge vers le centre
     // 1 - Atteint le centre
+    // 2 - Bouge vers cible
+    // 3 - Atteint Cible(drop le chose)
+    // 4 - Recule vers la ligne blanche
     private int state = 0;
 
     private boolean should_move = false;
@@ -45,7 +48,7 @@ public class autocool extends OpMode {
         dLeft = hardwareMap.get(DistanceSensor.class, "DistanceLeft");
         dRight = hardwareMap.get(DistanceSensor.class, "DistanceRight");
 
-        telemetry.addLine("Regroup");
+        telemetry.addLine("Better curves");
         telemetry.update();
     }
 
@@ -61,7 +64,17 @@ public class autocool extends OpMode {
         }
         else if(state == 1)
         {
+            // Fait rien
             state++;
+        }
+        else if(state == 2)
+        {
+        }
+        else if(state == 3)
+        {
+        }
+        else if(state == 4)
+        {
         }
         else
         {
@@ -75,23 +88,51 @@ public class autocool extends OpMode {
             should_move = false;
         }
 
+        // Moving
         if(should_move)
         {
-            lFront.setPower(mecanum.l1);
+            lFront.setPower(-mecanum.l1);
             rFront.setPower(mecanum.r1);
-            lBack.setPower(mecanum.l2);
+            lBack.setPower(-mecanum.l2);
             rBack.setPower(mecanum.r2);
         }
         else
         {
-
+            lBack.setPower(0);
+            rBack.setPower(0);
+            lFront.setPower(0);
+            rFront.setPower(0);
         }
+
+        telemetry.addData("State:", state);
+        telemetry.addData("Traveled",navigation.traveled);
+        telemetry.update();
     }
 
     // Moving to mid
     public void move_mid()
     {
-        double speed = 1;
-        mecanum.update(0,-speed,0);
+        // Hard limit
+        if(navigation.traveled > 4000)
+        {
+            telemetry.addLine("Help I'm lost UwU");
+            telemetry.update();
+            return;
+        }
+
+        if(navigation.traveled <= 3500)
+        {
+            // 5000 c un chiffre nice
+            double speed = (10000f-navigation.traveled) / 10000f;
+            telemetry.addData("Speed:",speed);
+            telemetry.update();
+            mecanum.update(0,-speed,0);
+            should_move = true;
+        }
+        else
+        {
+            should_move = false;
+            state++;
+        }
     }
 }
