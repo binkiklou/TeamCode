@@ -21,6 +21,8 @@ public class driver extends OpMode {
     private DcMotor rFront = null;
     private DcMotor lBack = null;
     private DcMotor rBack = null;
+
+    private DcMotor idfk = null;
     // Servos
     private Servo claw = null;
     // Sensors
@@ -40,13 +42,14 @@ public class driver extends OpMode {
         rFront = hardwareMap.get(DcMotor.class, "RightFront");
         lBack = hardwareMap.get(DcMotor.class, "LeftBack");
         rBack = hardwareMap.get(DcMotor.class, "RightBack");
+        idfk = hardwareMap.get(DcMotor.class, "idk");
         claw = hardwareMap.get(Servo.class, "Claw");
         dFront = hardwareMap.get(DistanceSensor.class, "DistanceFront");
         dLeft = hardwareMap.get(DistanceSensor.class, "DistanceLeft");
         dRight = hardwareMap.get(DistanceSensor.class, "DistanceRight");
         cGround = hardwareMap.get(ColorRangeSensor.class, "GroundColor");
 
-        telemetry.addLine("Gimme the color");
+        telemetry.addLine("la c la bonne");
         telemetry.update();
     }
 
@@ -55,12 +58,15 @@ public class driver extends OpMode {
         //telemetry.addData("range", String.format("%.01f mm", dsens.getDistance(DistanceUnit.MM)));
         //telemetry.update();
         // Si ya des problemes c a cause de ca
+        float idkv = -gamepad1.left_trigger + gamepad1.right_trigger;
+
         mecanum.update(gamepad1.left_stick_x,gamepad1.left_stick_y,gamepad1.right_stick_x);
         telemetry.addData("Mecanum",String.format("({%.01f,%.01f},{%.01f,%.01f})",mecanum.l1,mecanum.l2,mecanum.r1,mecanum.r2));
         telemetry.addData("Encoders",String.format("({%d,%d},{%d,%d})",lFront.getCurrentPosition(),rFront.getCurrentPosition(),lBack.getCurrentPosition(),rBack.getCurrentPosition()));
         telemetry.addData("Distances:",String.format("%.01f; %.01f, %.01f",dFront.getDistance(DistanceUnit.CM),dLeft.getDistance(DistanceUnit.CM),dRight.getDistance(DistanceUnit.CM)));
         telemetry.addData("Traveled: ",String.format("%d",navigation.traveled));
         telemetry.addData("Ground Color:",String.format("(%d,%d,%d)",cGround.red(),cGround.blue(),cGround.green()));
+        //telemetry.addData("idkv:",String.format("%0.1f",idkv));
         telemetry.update();
 
         // Input Update
@@ -83,5 +89,8 @@ public class driver extends OpMode {
         {
             claw.setPosition(0.15);
         }
+
+        // Update idfk
+        idfk.setPower(idkv / 2.0f);
     }
 }
