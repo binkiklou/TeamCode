@@ -9,13 +9,15 @@ public class navigation {
     public static double left = 0;
     public static double right = 0;
 
+    public static int maskv = 0;
+
     public static void avg_travel(int a,int b, int c, int d)
     {
         // Ya deux qui doivent être reversed
         b = -b;
         d = -d;
 
-        traveled = (a+b+c+d)/4;
+        traveled = ((a+b+c+d)/4) - maskv;
     }
 
     public static void avg_sensors(double a, double b, double c)

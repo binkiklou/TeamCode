@@ -33,8 +33,9 @@ public class autocool extends OpMode {
     // 0 - Bouge vers le centre
     // 1 - Atteint le centre
     // 2 - Bouge vers cible
-    // 3 - Atteint Cible(drop le chose)
+    // 3 - Atteint Cible
     // 4 - Recule vers la ligne blanche
+    // 5 - Atteint la ligne
     private int state = 0;
 
     private boolean should_move = false;
@@ -58,7 +59,7 @@ public class autocool extends OpMode {
         cGround = hardwareMap.get(ColorRangeSensor.class, "GroundColor");
         int soundID = hardwareMap.appContext.getResources().getIdentifier("dababy", "raw", hardwareMap.appContext.getPackageName());
 
-        telemetry.addLine("danger publique: le retour 2");
+        telemetry.addLine("je souffre 1");
         telemetry.update();
 
         SoundPlayer.getInstance().startPlaying(hardwareMap.appContext, soundID);
@@ -77,7 +78,8 @@ public class autocool extends OpMode {
         }
         else if(state == 1)
         {
-            // Fait rien
+            // Update le mask
+            navigation.maskv += navigation.traveled;
             state++;
         }
         else if(state == 2)
@@ -86,35 +88,23 @@ public class autocool extends OpMode {
         }
         else if(state == 3)
         {
-            lFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            rFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            lBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            rBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            claw_open = true;
             state++;
-            wait_for_something = true;
         }
         else if(state == 4)
         {
-            if(wait_for_something)
-            {
-                lFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                rFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                lBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                rBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                wait_for_something = false;
-            }
             move_back();
         }
         else
         {
             telemetry.addLine("Invalid state");
-            telemetry.update();
         }
 
         // Emergency Checks
         if(navigation.front <= 20|| navigation.left <= 15 || navigation.right <= 15)
         {
-            should_move = false;
+            //should_move = false;
+            telemetry.addLine("EMERGENCY STOP PAS SECURITAIRE");
         }
 
         // Moving
@@ -137,10 +127,16 @@ public class autocool extends OpMode {
         {
             claw.setPosition(0.15);
         }
+        else
+        {
+            claw.setPosition(0.6);
+        }
 
+        telemetry.addData("Should_Move:", should_move);
         telemetry.addData("State:", state);
         telemetry.addData("Traveled",navigation.traveled);
-        telemetry.addData("Colors:",String.format("(%d,%d,%d)",cGround.red(),cGround.green(),cGround.blue()));
+        //telemetry.addData("Colors:",String.format("(%d,%d,%d)",cGround.red(),cGround.green(),cGround.blue()));
+        //telemetry.addData("Sensors:", String.format("(%d,%d,%d)",navigation.left,navigation.front,navigation.right));
         telemetry.update();
     }
 
@@ -151,15 +147,11 @@ public class autocool extends OpMode {
         if(navigation.traveled > 4500)
         {
             telemetry.addLine("Help I'm lost UwU");
-            telemetry.update();
             should_move = false;
             return;
         }
 
-        if(
-                navigation.traveled <= 4200 //||
-        //                (navigation.traveled > 2500 && (cGround.red() >= 1000 || cGround.green() >= 1000 || cGround.blue() >= 1000))
-        )
+        if(navigation.traveled < 3000 )
         {
             double speed = (((10000f-navigation.traveled) / 10000f)/1.5) * 2;
             if(navigation.traveled > 2750)
@@ -168,16 +160,13 @@ public class autocool extends OpMode {
             }
             mecanum.update(0,-speed,0);
             should_move = true;
+            telemetry.addLine("HERE");
         }
         else
         {
-            if(navigation.traveled >= 4200)
-            {
-                state = 5;
-            }
-
             should_move = false;
             state++;
+            telemetry.addLine("NOT HERE");
         }
     }
 
@@ -197,12 +186,14 @@ public class autocool extends OpMode {
 
     public void move_back()
     {
-        if(navigation.traveled > 3000)
+        if(navigation.traveled > 0)
         {
-            mecanum.update(0,1,0);
+            mecanum.update(0,0.5,0);
+            should_move = true;
         }
         else
         {
+            should_move = false;
             state++;
         }
     }
