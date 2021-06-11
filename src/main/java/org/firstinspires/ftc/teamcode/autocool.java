@@ -42,9 +42,6 @@ public class autocool extends OpMode {
 
     private boolean claw_open = false;
 
-    private boolean wait_for_something = false; // Terrible
-
-
     @Override
     public void init() {
         // Hardware definitions
@@ -59,7 +56,7 @@ public class autocool extends OpMode {
         cGround = hardwareMap.get(ColorRangeSensor.class, "GroundColor");
         int soundID = hardwareMap.appContext.getResources().getIdentifier("dababy", "raw", hardwareMap.appContext.getPackageName());
 
-        telemetry.addLine("je souffre 1");
+        telemetry.addLine("v0");
         telemetry.update();
 
         SoundPlayer.getInstance().startPlaying(hardwareMap.appContext, soundID);
@@ -125,16 +122,19 @@ public class autocool extends OpMode {
 
         if(claw_open == true)
         {
-            claw.setPosition(0.15);
+            claw.setPosition(0.6);
         }
         else
         {
-            claw.setPosition(0.6);
+            claw.setPosition(0.15);
         }
 
         telemetry.addData("Should_Move:", should_move);
         telemetry.addData("State:", state);
         telemetry.addData("Traveled",navigation.traveled);
+        telemetry.addData("Left:",navigation.left);
+        telemetry.addData("Front:",navigation.front);
+        telemetry.addData("Right:",navigation.right);
         //telemetry.addData("Colors:",String.format("(%d,%d,%d)",cGround.red(),cGround.green(),cGround.blue()));
         //telemetry.addData("Sensors:", String.format("(%d,%d,%d)",navigation.left,navigation.front,navigation.right));
         telemetry.update();
@@ -148,12 +148,13 @@ public class autocool extends OpMode {
         {
             telemetry.addLine("Help I'm lost UwU");
             should_move = false;
+
             return;
         }
 
         if(navigation.traveled < 3000 )
         {
-            double speed = (((10000f-navigation.traveled) / 10000f)/1.5) * 2;
+            double speed = (((10000f-navigation.traveled) / 10000f)/1.5);
             if(navigation.traveled > 2750)
             {
                 speed /= 2;
@@ -172,7 +173,7 @@ public class autocool extends OpMode {
 
     public void move_target()
     {
-        if(navigation.traveled < 1000)
+        if(navigation.traveled < 2350 && navigation.front >= 25)
         {
             mecanum.update(0,-0.5,0);
             should_move = true;

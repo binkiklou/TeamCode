@@ -25,6 +25,7 @@ public class driver extends OpMode {
     private DcMotor idfk = null;
     // Servos
     private Servo claw = null;
+    private Servo stopper = null;
     // Sensors
     private DistanceSensor dFront = null;
     private DistanceSensor dLeft = null;
@@ -33,6 +34,7 @@ public class driver extends OpMode {
 
     // Values
     private boolean sclaw = false;
+    private boolean sstopper = false;
 
     @Override
     public void init()
@@ -44,12 +46,13 @@ public class driver extends OpMode {
         rBack = hardwareMap.get(DcMotor.class, "RightBack");
         idfk = hardwareMap.get(DcMotor.class, "idk");
         claw = hardwareMap.get(Servo.class, "Claw");
+        stopper = hardwareMap.get(Servo.class, "Stopper");
         dFront = hardwareMap.get(DistanceSensor.class, "DistanceFront");
         dLeft = hardwareMap.get(DistanceSensor.class, "DistanceLeft");
         dRight = hardwareMap.get(DistanceSensor.class, "DistanceRight");
         cGround = hardwareMap.get(ColorRangeSensor.class, "GroundColor");
 
-        telemetry.addLine("la c la bonne");
+        telemetry.addLine("yyyeeeeee");
         telemetry.update();
     }
 
@@ -71,6 +74,7 @@ public class driver extends OpMode {
 
         // Input Update
         sclaw = gamepad1.a;
+        sstopper = gamepad1.b;
 
         // Update Drive
         lFront.setPower(-mecanum.l1);
@@ -88,6 +92,15 @@ public class driver extends OpMode {
         else
         {
             claw.setPosition(0.15);
+        }
+
+        if(sstopper)
+        {
+            stopper.setPosition(0);
+        }
+        else
+        {
+            stopper.setPosition(0.5);
         }
 
         // Update idfk
